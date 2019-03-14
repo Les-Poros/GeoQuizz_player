@@ -10,45 +10,35 @@
     <div id="main_page">
             <nav class="navbar navbar-light bg-light d-flex flex-row">
                    
-                    <div class="input-group">
-                            <img src="images/logo.png"  style="width: 3%; height: 3%" >
-                            <div class="input-group-prepend mr-2">
+              <div class="input-group">
+                <img src="images/logo.png"  style="width: 3%; height: 3%" >
+                     <div class="input-group-prepend mr-2">
                                 
-                                <!-- Type de la recherche -->
-                              <select class="selectpicker ml-2 mr-2 bg-secondary text-white">
-                                        <option value="" selected disabled hidden>Série</option>
-                                          <option selected value="nancy">Nancy</option>
-                                          <option value="paris">Paris</option>
-                                        </select>
+                        <!-- Type de la recherche -->
+                       <serie v-bind:liste_serie="listeSeries"></serie>
 
-                              <select class="selectpicker ml-2 mr-2 bg-secondary text-white">
-                                      <option value="" selected disabled hidden>Difficulté</option>
-                                        <option selected value="normal">Normal</option>
-                                        <option value="difficile">Difficile</option>
-                                        <option value="difficile">Géographe</option>
-                                    </select>
-                            </div>
+                   <select class="selectpicker ml-2 mr-2 bg-secondary text-white">
+                            <option value="" selected disabled hidden>Difficulté</option>
+                            <option selected value="normal">Normal</option>
+                            <option value="difficile">Difficile</option>
+                            <option value="difficile">Géographe</option>                                   </select>
+                    </div>
                             <!-- variable de la recherche -->
-                            <input type="text" class="form-control text-center" placeholder="Votre pseudo..." aria-label="recherche" v-model="search" aria-describedby="button-addon2" v-on:keyup.enter="faireRecherche()"/>
-                            <div class="input-group-append w-25">
-                              <!-- validation de la recherche -->
-                              <button v-on:click="faireRecherche()" class="btn btn-secondary ml-2">
+                    <input type="text" class="form-control text-center" placeholder="Votre pseudo..." aria-label="pseudo" v-model="pseudo" aria-describedby="button-addon2" v-on:keyup.enter="getSeries()"/>
+                    <div class="input-group-append w-25">
+                            <!-- validation de la recherche -->
+                       <button v-on:click="getSeries()" class="btn btn-secondary ml-2">
                                Lancer la partie
-                              </button>
-                            </div>
-                          </div>
-                      <!-- <img src="images/logo.png"  style="width: 5%; height: 5%" >
-                      <select class="selectpicker">
-                            <option value="" selected disabled hidden>Série</option>
-                              <option selected value="nancy">Nancy</option>
-                              <option value="paris">Paris</option>
-                            </select>
-
+                        </button>
+                    </div>
                     
-                              <input type="text" class="form-control" placeholder="Votre Pseudo..." aria-label="recherche" aria-describedby="button-addon2" v-on:keyup.enter=""> -->
-
+                    </div>
                   </nav>                  
     </div>
       
+
+        <script src="https://cdn.jsdelivr.net/npm/vue@2.5.22/dist/vue.js"></script>
+        <script src="https://unpkg.com/axios@0.18.0/dist/axios.js"></script>
+        <script src="js/geoquizz_demarer_partie.js"></script>
   </body>
 </html>
