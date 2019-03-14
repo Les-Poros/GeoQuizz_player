@@ -8,32 +8,37 @@
   </head>
   <body>
     <div id="main_page">
-            <nav class="navbar navbar-light bg-light d-flex flex-row">
+      <navbar v-bind:liste_serie="listeSeries"></navbar>
+            <!-- <nav class="navbar navbar-light bg-light d-flex flex-row">
                    
               <div class="input-group">
                 <img src="images/logo.png"  style="width: 3%; height: 3%" >
-                     <div class="input-group-prepend mr-2">
+                     <div class="input-group-prepend mr-2"> -->
                                 
                         <!-- Type de la recherche -->
-                       <serie v-bind:liste_serie="listeSeries"></serie>
+                       <!-- <select class="selectpicker ml-2 mr-2 bg-secondary text-white" @change="onChangeSerie($event)">
+                           <option value="" selected disabled hidden>Série</option>
+                            <option v-for=""selected value="nancy">Nancy</option>
+                            <option value="paris">Paris</option>
+                         </select> -->
 
-                   <select class="selectpicker ml-2 mr-2 bg-secondary text-white">
+                   <!-- <select class="selectpicker ml-2 mr-2 bg-secondary text-white">
                             <option value="" selected disabled hidden>Difficulté</option>
                             <option selected value="normal">Normal</option>
                             <option value="difficile">Difficile</option>
                             <option value="difficile">Géographe</option>                                   </select>
-                    </div>
+                    </div> -->
                             <!-- variable de la recherche -->
-                    <input type="text" class="form-control text-center" placeholder="Votre pseudo..." aria-label="pseudo" v-model="pseudo" aria-describedby="button-addon2" v-on:keyup.enter="getSeries()"/>
-                    <div class="input-group-append w-25">
+                    <!-- <input type="text" class="form-control text-center" placeholder="Votre pseudo..." aria-label="pseudo" v-model="pseudo" aria-describedby="button-addon2" v-on:keyup.enter="getSeries()"/>
+                    <div class="input-group-append w-25"> -->
                             <!-- validation de la recherche -->
-                       <button v-on:click="getSeries()" class="btn btn-secondary ml-2">
+                       <!-- <button v-on:click="getSeries()" class="btn btn-secondary ml-2">
                                Lancer la partie
                         </button>
                     </div>
                     
                     </div>
-                  </nav>                  
+                  </nav>                   -->
     </div>
       
 
