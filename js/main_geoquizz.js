@@ -201,11 +201,18 @@ Vue.component('start',{
             })           
             .then(response => {
                 //On vérifie qu'il y a bien un résultat
-                if(response.data.photo.length > 0){
+                if(response.data.photo.length > 0 && response.data.photo.length <= 10){
+                    
                   this.listePhoto = response.data.photo;
+                  this.listePhoto.sort(function(){return 0.5 - Math.random()});
+                  console.log(this.listePhoto);
 
                   console.log(this.listePhoto);
                     
+                }
+                else{
+                   //CAS ou plus de 10 photos
+                   
                 }
             });
         
