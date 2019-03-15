@@ -1,13 +1,9 @@
-Vue.component('accueil',{
-    data: function () {
-        return {
-        
-        }
-      },
-      methods: {
-      
-      },
-    template:`
+Vue.component("accueil", {
+  data: function() {
+    return {};
+  },
+  methods: {},
+  template: `
     <div class="d-flex justify-content-center app">
         <div class="centrage d-flex flex-column align-items-center ">
         <img src="images/logo.png" class="img-fluid">
@@ -16,71 +12,64 @@ Vue.component('accueil',{
         </div>
         </div>
     `
-})
+});
 
-Vue.component('start',{
-    data: function () {
-      return {
-        niveauFilter:'',
-        pseudo : '',
-        idSerie:'',
-        listeSeries:'',
-        
-      }
+Vue.component("start", {
+  data: function() {
+    return {
+      niveauFilter: "",
+      pseudo: "",
+      idSerie: "",
+      listeSeries: ""
+    };
+  },
+  methods: {
+    getSerie(event) {
+      this.idSerie = event.target.value;
+      console.log(this.idSerie);
     },
-    methods: {
-      getSerie(event){
-        
-        this.idSerie = event.target.value;
-        console.log(this.idSerie);
-      },
-      getNiveau(event){
-        this.niveauFilter = event.target.value;
-        console.log(this.niveauFilter);
-      },
-  
-      sendData(){
-        if(this.idSerie && this.niveauFilter && this.pseudo != null){
-          this.postBody = {
-              "joueur": this.pseudo,
-          };
-                
-          axios
-          .post('http://192.168.99.100:8082/parties/series/'+this.idSerie, this.postBody, {
-            headers: {
-              "Content-Type": "application/json"
-            },
-          })
+    getNiveau(event) {
+      this.niveauFilter = event.target.value;
+      console.log(this.niveauFilter);
+    },
+
+    sendData() {
+      if (this.idSerie && this.niveauFilter && this.pseudo != null) {
+        this.postBody = {
+          joueur: this.pseudo
+        };
+
+        axios
+          .post(
+            "http://192.168.99.100:8082/parties/series/" + this.idSerie,
+            this.postBody,
+            {
+              headers: {
+                "Content-Type": "application/json"
+              }
+            }
+          )
           .then(response => {
-           
-            this.$emit('startgame',[response.data.id, response.data.token]);
-           
-            
+            this.$emit("startgame", [response.data.id, response.data.token]);
           })
           .catch(error => {
             console.log(error);
           });
-        
+      }
+    }
+  },
+  created() {
+    axios
+      .get("http://192.168.99.100:8083/series", {})
+
+      .then(response => {
+        //On vérifie qu'il y a bien un résultat
+        if (response.data.content.length > 0) {
+          this.listeSeries = response.data.content;
         }
-      },
-       
-    },
-    created(){
-        axios.get('http://192.168.99.100:8083/series',{
-        
-        })
-       
-        .then(response => {
-            //On vérifie qu'il y a bien un résultat
-            if(response.data.content.length > 0){
-              this.listeSeries = response.data.content;
-              
-                
-            }
-        
-    });
-    },
-    template: `
+      });
+  },
+  template: `
     
     <nav class="navbar navbar-light bg-light d-flex flex-row">   
                 <div class="input-group">
@@ -109,52 +98,48 @@ Vue.component('start',{
             </div>
             </nav> 
              `,
-    props : ['liste_serie'],
-  
-  });
-  
-  
-  Vue.component('game',{
-    data: function () {
-        return {
-            cible : '',
-            pos:'',
-            lat: '',
-            lon:'',
-            clique:'',
-            res:'',
-            zone:'',
+  props: ["liste_serie"]
+});
 
-            //photo
-            index : 0,
+Vue.component("game", {
+  props: ["liste_photo"],
+  data: function() {
+    return {
+      pos: "",
+      lat: "",
+      lon: "",
+      clique: "",
+      res: "",  
+      map: "",
+      //photo
+      index: 0
+    };
+  },
+  methods: {
+    next() {
+      if (this.index < 10) {
+        this.index++;
+      }
+    }
+  },
+  mounted() {
+    this.map = L.map("mapid").setView([48.68439, 6.1849601], 13);
+    L.tileLayer(
+      "https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}",
+      {
+        attribution:
+          'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
+        maxZoom: 18,
+        id: "mapbox.streets",
+        accessToken:
+          "pk.eyJ1IjoibGVvbGV6aWciLCJhIjoiY2p0NGk5bGhxMDN6MjN5bnc0dWo5M2w1YSJ9.Rp94LWSF0ljKG8zCV2MdBw"
+      }
+    ).addTo(this.map);
 
-        }
-      },
-      methods :{
-        next(){
-            if(this.index < 10){
-
-                this.index++;
-            }
-        }
-      },
-    created(){
-        // this.mymap = L.map('mapid').setView([48.6843900,  6.1849600], 13);
-            
-        //     this.tileStreets = L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}', {
-        //         attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
-        //         maxZoom : 18,
-        //         minZoom : 12,
-        //         id: 'mapbox.streets',
-        //         accessToken: 'pk.eyJ1IjoibGVvbGV6aWciLCJhIjoiY2p0NGk5bGhxMDN6MjN5bnc0dWo5M2w1YSJ9.Rp94LWSF0ljKG8zCV2MdBw'
-                
-        //         });
-               
-        //     this.tileStreets.addTo(this.mymap);
-        //     this.cible = L.marker([48.6939,6.182909999999993]).addTo(this.mymap);
-        //     this.zone = L.circle([48.6843900,  6.1849600], {radius: 2000}).addTo(this.mymap);
-    },
-    template: `
+    L.marker([48.6939, 6.182909999999993]).addTo(this.map);
+    L.circle([48.68439, 6.18496], { radius: 2000 }).addTo(this.map);
+  },
+  template: `
     <div>
     <nav class="navbar navbar-light bg-light d-flex flex-row nav-text">   
                 <div class="input-group text-center">
@@ -173,63 +158,52 @@ Vue.component('start',{
     <div class="col-lg-5" >
     <div>
         
-        <img :src="liste_photo[index].url" style="width:100%; height :100%;margin-right: 10px;" >
+        <img  :src="'http://192.168.99.100:8083'+liste_photo[index].url" style="width:100%; height :100%;margin-right: 10px;" >
         <button v-on:click=next()>next</button>
     </div>
     </div>
     </div>
     </div>
     
-     `,
-     props : ['liste_photo'],
-   
-  
-  });
-    
+     `
+});
 
+var content = new Vue({
+  el: "#main_page",
+  data: {
+    isAccueil: true,
+    idPartie: "",
+    token: "",
+    listePhoto: []
+  },
+  methods: {
+    startGame(info) {
+      axios
+        .get("http://192.168.99.100:8082/parties/" + info[0], {
+          headers: {
+            "x-lbs-token": info[1]
+          }
+        })
+        .then(response => {
+          //On vérifie qu'il y a bien un résultat
+          if (
+            response.data.photo.length > 0 &&
+            response.data.photo.length <= 10
+          ) {
+            this.idPartie = info[0];
+            this.token = info[1];
+            this.listePhoto = response.data.photo;
 
-  var content = new Vue({
-    el: '#main_page',
-    data: {
-        isAccueil : true,
-        idPartie:'',
-        token:'',
-        listePhoto: [],
-         
-   },
-    methods: {
-       startGame(info){
-           this.idPartie =info[0];
-           this.token = info[1];
-            console.log('token : '+this.token + 'idPartie : '+ this.idPartie);
-       
-            axios.get('http://192.168.99.100:8082/parties/'+this.idPartie,{
-                headers: {
-                    'x-lbs-token': this.token,
-                    
-                },
-        
-            })           
-            .then(response => {
-                //On vérifie qu'il y a bien un résultat
-                if(response.data.photo.length > 0 && response.data.photo.length <= 10){
-                    
-                  this.listePhoto = response.data.photo;
-                  
-                  console.log(this.listePhoto);
-                }
-                else{
-                   //CAS ou plus de 10 photos
-                   
-                }
-            });
-        
-    },
-    },
-    computed: {
-     
-    },
-    created() {
-        
+            console.log(this.listePhoto);
+          } else {
+            //CAS ou plus de 10 photos
+          }
+        });
+
+      console.log("token : " + this.token + "idPartie : " + this.idPartie);
     }
-    });
+  },
+  computed: {},
+  created() {
+  }
+});
