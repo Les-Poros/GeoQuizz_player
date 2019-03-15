@@ -125,6 +125,17 @@ Vue.component('start',{
             res:'',
             zone:'',
 
+            //photo
+            index : 0,
+
+        }
+      },
+      methods :{
+        next(){
+            if(this.index < 10){
+
+                this.index++;
+            }
         }
       },
     created(){
@@ -148,7 +159,7 @@ Vue.component('start',{
     <nav class="navbar navbar-light bg-light d-flex flex-row nav-text">   
                 <div class="input-group text-center">
                 <img src="images/logo.png"  style="width: 3%; height: 3%" >
-                <h2> Serie : Nancy - Photo(1/10)</h2>
+                <h2> Serie : Nancy - Photo({{index}}/10)</h2>
                 </div>
             </nav> 
     <div class="row">
@@ -160,12 +171,12 @@ Vue.component('start',{
     </div>
 
     <div class="col-lg-5" >
-    <div v-for="img in liste_photo">
+    <div>
         
-        <img :src="img.url" style="width:100%; height :100%;margin-right: 10px;" >
+        <img :src="liste_photo[index].url" style="width:100%; height :100%;margin-right: 10px;" >
+        <button v-on:click=next()>next</button>
     </div>
     </div>
-
     </div>
     </div>
     
@@ -204,11 +215,8 @@ Vue.component('start',{
                 if(response.data.photo.length > 0 && response.data.photo.length <= 10){
                     
                   this.listePhoto = response.data.photo;
-                  this.listePhoto.sort(function(){return 0.5 - Math.random()});
+                  
                   console.log(this.listePhoto);
-
-                  console.log(this.listePhoto);
-                    
                 }
                 else{
                    //CAS ou plus de 10 photos
