@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>GeoQuizz</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <link rel="stylesheet" href="css/geoquizzplayer.css">
+    <meta charset="utf8">
+  </head>
+  <body>
+   <div id="main_page">
+    <accueil v-if="isAccueil" v-on:ready="isAccueil = false"></accueil>
+    <start v-else-if=" !idPartie" v-on:startgame="startGame($event)"></start>
+    <game v-else-if="idPartie !=''"></game>
+
+    
+
+
+   </div>
+      <script src="https://cdn.jsdelivr.net/npm/vue@2.5.22/dist/vue.js"></script>
+      <script src="https://unpkg.com/axios@0.18.0/dist/axios.js"></script>
+      <script src="js/main_geoquizz.js"></script>
+  </body>
+  
+</html>
