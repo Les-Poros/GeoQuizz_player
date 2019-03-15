@@ -21,8 +21,7 @@ Vue.component('navbar',{
     sendData(){
       if(this.idSerie && this.niveauFilter && this.pseudo != null){
         this.postBody = {
-          "id": this.idSerie,
-          "joueur": this.pseudo,
+            "joueur": this.pseudo,
         };
               
         axios
