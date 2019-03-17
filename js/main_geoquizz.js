@@ -110,6 +110,7 @@ Vue.component("game", {
   props: ["liste_photo","liste_serie"],
   data: function() {
     return {
+     
       pos: "",
       lat:'',
       lon: "",
@@ -125,8 +126,17 @@ Vue.component("game", {
     next() {
       if (this.index < 10) {
         this.index++;
+        console.log(this.index);
       }
-    }
+    },
+    clickMap(map){
+      this.index++;
+          console.log(this.index);
+    
+  }
+  },
+  computed:{
+    
   },
   mounted() {
     
@@ -144,8 +154,26 @@ Vue.component("game", {
       }
     ).addTo(this.map);
 
+    //place stanislas
     L.marker([48.6939, 6.182909999999993]).addTo(this.map);
     L.circle([48.68439, 6.18496], { radius: 2000 }).addTo(this.map);
+
+    //Une fois load, on écoute les actions sur la carte
+    this.map.on('click', function(e) {
+          
+      this.pos=e.latlng;
+      this.lat = this.pos['lat'];
+      this.lon= this.pos['lng'];
+      console.log(this.pos);
+      console.log(this.lat);
+      console.log(this.lon);
+      this.clique = L.marker([this.lat,this.lon]).addTo(this);
+      return(this.clique);
+     
+   
+      //une fois le marker placé, on change de photo
+          })
+          console.log(this.clique);
   },
   template: `
     <div>
