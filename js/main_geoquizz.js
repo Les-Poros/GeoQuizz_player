@@ -129,7 +129,8 @@ Vue.component("game", {
       {
         attribution:
           'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
-        maxZoom: 18,
+          maxZoom : 18,
+          minZoom : 12,
         id: "mapbox.streets",
         accessToken:
           "pk.eyJ1IjoibGVvbGV6aWciLCJhIjoiY2p0NGk5bGhxMDN6MjN5bnc0dWo5M2w1YSJ9.Rp94LWSF0ljKG8zCV2MdBw"
