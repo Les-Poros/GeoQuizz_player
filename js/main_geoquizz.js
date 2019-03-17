@@ -158,7 +158,7 @@ Vue.component("game", {
     <div class="col-lg-5" >
     <div>
         
-        <img  :src="'http://192.168.99.100:8083'+liste_photo[index].url" style="width:100%; height :100%;margin-right: 10px;" >
+        <img  :src="liste_photo[index].url" style="width:100%; height :100%;margin-right: 10px;" >
         <button v-on:click=next()>next</button>
     </div>
     </div>
@@ -194,13 +194,14 @@ var content = new Vue({
             this.token = info[1];
             this.listePhoto = response.data.photo;
 
-            console.log(this.listePhoto);
+            console.log(this.listePhoto[0].url);
+            console.log("token : " + this.token + "idPartie : " + this.idPartie);
           } else {
             //CAS ou plus de 10 photos
           }
         });
 
-      console.log("token : " + this.token + "idPartie : " + this.idPartie);
+     
     }
   },
   computed: {},
