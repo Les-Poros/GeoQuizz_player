@@ -60,13 +60,18 @@ Vue.component("start", {
   },
   created() {
     axios
-      .get("http://192.168.99.100:8083/series", {})
+      .get("http://192.168.99.100:8083/series", {
+
+      })
 
       .then(response => {
         //On vérifie qu'il y a bien un résultat
         if (response.data.content.length > 0) {
+          this.$emit("getserie",[response.data.content[0].map_lat, response.data.content[0].map_lon]);
           this.listeSeries = response.data.content;
+          console.log(this.listeSeries);
         }
+
       });
   },
   template: `
@@ -102,17 +107,18 @@ Vue.component("start", {
 });
 
 Vue.component("game", {
-  props: ["liste_photo"],
+  props: ["liste_photo","liste_serie"],
   data: function() {
     return {
       pos: "",
-      lat: "",
+      lat:'',
       lon: "",
       clique: "",
       res: "",  
       map: "",
       //photo
       index: 0
+      
     };
   },
   methods: {
@@ -123,7 +129,8 @@ Vue.component("game", {
     }
   },
   mounted() {
-    this.map = L.map("mapid").setView([48.68439, 6.1849601], 13);
+    
+    this.map = L.map("mapid").setView([this.liste_serie[0], this.liste_serie[1]], 13);
     L.tileLayer(
       "https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}",
       {
@@ -175,9 +182,14 @@ var content = new Vue({
     isAccueil: true,
     idPartie: "",
     token: "",
-    listePhoto: []
+    listePhoto: [],
+    listeSerie:[],
   },
   methods: {
+    getSerie(info){
+      this.listeSerie = [info[0],info[1]];
+      console.log('liste : ' + this.listeSerie);
+    },
     startGame(info) {
       axios
         .get("http://192.168.99.100:8082/parties/" + info[0], {
@@ -195,7 +207,7 @@ var content = new Vue({
             this.token = info[1];
             this.listePhoto = response.data.photo;
 
-            console.log(this.listePhoto[0].url);
+            console.log(this.listePhoto);
             console.log("token : " + this.token + "idPartie : " + this.idPartie);
           } else {
             //CAS ou plus de 10 photos

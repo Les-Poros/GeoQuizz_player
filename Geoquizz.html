@@ -20,12 +20,13 @@
   <body>
     <div id="main_page">
       <accueil v-if="isAccueil" v-on:ready="isAccueil = false"></accueil>
-      <start v-else-if=" !idPartie" v-on:startgame="startGame($event)"></start>
+      <start v-else-if=" !idPartie" v-on:startgame="startGame($event)" v-on:getserie="getSerie($event)"></start>
       <game
         v-else-if="idPartie !=''"
         :token="token"
         :idpartie="idPartie"
         v-bind:liste_photo="listePhoto"
+        v-bind:liste_serie="listeSerie"
       ></game>
     </div>
     <script src="https://cdn.jsdelivr.net/npm/vue@2.5.22/dist/vue.js"></script>
