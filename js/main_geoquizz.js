@@ -168,12 +168,12 @@ Vue.component("game", {
       console.log(this.lat);
       console.log(this.lon);
       this.clique = L.marker([this.lat,this.lon]).addTo(this);
-      return(this.clique);
+      
      
    
       //une fois le marker placé, on change de photo
           })
-          console.log(this.clique);
+         
   },
   template: `
     <div>
