@@ -115,6 +115,7 @@ Vue.component("game", {
       lat:'',
       lon: "",
       clique: "",
+      cible:"",
       res: "",  
       map: "",
       //photo
@@ -123,6 +124,13 @@ Vue.component("game", {
     };
   },
   methods: {
+
+    calculateDistance(){
+      console.log(this.pos +"cible : "+ this.cible["_latlng"]);
+      this.res= L.GeometryUtil.length([this.pos,this.cible["_latlng"]]);
+      console.log(this.res);
+      this.next();
+    },
     next() {
       if (this.index < 10) {
         this.index++;
@@ -131,7 +139,7 @@ Vue.component("game", {
     },
     clickMap(map){
       let self =this;
-      if(this.pos ==''){
+      
       this.map.on('click', function(e) {
           
         self.pos=e.latlng;
@@ -139,15 +147,13 @@ Vue.component("game", {
         self.lon= self.pos['lng'];
         console.log(e);
         self.clique = L.marker([self.lat,self.lon]).addTo(map);
-        self.next();
+        self.calculateDistance();
       
   });
 }
-      else{
-        console.log("on a cliqué");
-      }
-}
-  },
+      
+},
+  
   computed:{
     
   },
@@ -168,7 +174,7 @@ Vue.component("game", {
     ).addTo(this.map);
 
     //place stanislas
-    L.marker([48.6939, 6.182909999999993]).addTo(this.map);
+    this.cible = L.marker([48.6939, 6.182909999999993]);
     L.circle([this.liste_serie[0], this.liste_serie[1]], { radius: 2000 }).addTo(this.map);
 
     //Une fois load, on écoute les actions sur la carte
@@ -185,7 +191,8 @@ Vue.component("game", {
     <nav class="navbar navbar-light bg-light d-flex flex-row nav-text">   
                 <div class="input-group text-center">
                 <img src="images/logo.png"  style="width: 3%; height: 3%" >
-                <h2> Serie : Nancy - Photo({{index}}/10)</h2>
+                <h2 v-if="index > 1"> Serie : Nancy - Photo({{index}}/10)</h2>
+                <h2 v-else>Serie : Nancy - Photo(1/10)</h2>
                 </div>
             </nav> 
     <div class="row">
