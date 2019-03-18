@@ -130,10 +130,23 @@ Vue.component("game", {
       }
     },
     clickMap(map){
-      this.index++;
-          console.log(this.index);
-    
-  }
+      let self =this;
+      if(this.pos ==''){
+      this.map.on('click', function(e) {
+          
+        self.pos=e.latlng;
+        self.lat = self.pos['lat'];
+        self.lon= self.pos['lng'];
+        console.log(e);
+        self.clique = L.marker([self.lat,self.lon]).addTo(map);
+        self.next();
+      
+  });
+}
+      else{
+        console.log("on a cliqué");
+      }
+}
   },
   computed:{
     
@@ -156,23 +169,15 @@ Vue.component("game", {
 
     //place stanislas
     L.marker([48.6939, 6.182909999999993]).addTo(this.map);
-    L.circle([48.68439, 6.18496], { radius: 2000 }).addTo(this.map);
+    L.circle([this.liste_serie[0], this.liste_serie[1]], { radius: 2000 }).addTo(this.map);
 
     //Une fois load, on écoute les actions sur la carte
-    this.map.on('click', function(e) {
-          
-      this.pos=e.latlng;
-      this.lat = this.pos['lat'];
-      this.lon= this.pos['lng'];
-      console.log(this.pos);
-      console.log(this.lat);
-      console.log(this.lon);
-      this.clique = L.marker([this.lat,this.lon]).addTo(this);
-      
+    
+      this.clickMap(this.map);
      
    
       //une fois le marker placé, on change de photo
-          })
+         
          
   },
   template: `
