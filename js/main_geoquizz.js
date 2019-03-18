@@ -15,6 +15,7 @@ Vue.component("accueil", {
 });
 
 Vue.component("finish", {
+  props : ["is_finish"],
   data: function() {
     return {
 
@@ -23,7 +24,7 @@ Vue.component("finish", {
   methods: {},
   template: `
     <div class="d-flex justify-content-center app">
-        FINISH
+          {{is_finish}}
         </div>
     `
 });
@@ -160,7 +161,7 @@ Vue.component("game", {
     }
     else{
       this.statusGame = true;
-      this.$emit("isfinish",this.statusGame);
+      this.$emit("isfinish",[this.statusGame,this.scoreTot]);
       console.log("finish");
     }
     },
@@ -268,6 +269,7 @@ var content = new Vue({
   data: {
     isAccueil: true,
     isFinish: false,
+    scoreTot : 0,
     idPartie: "",
     token: "",
     listePhoto: [],
@@ -306,7 +308,9 @@ var content = new Vue({
      
     },
     getFinish(finish){
-      this.isFinish = finish;
+      this.isFinish = finish[0];
+      this.scoreTot = finish[1];
+      console.log("score de fin :" + this.scoreTot)
     }
   },
   computed: {},

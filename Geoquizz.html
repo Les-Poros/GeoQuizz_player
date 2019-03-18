@@ -29,7 +29,9 @@
         v-bind:liste_serie="listeSerie"
         v-on:isfinish="getFinish($event)"
       ></game>
-      <finish v-else-if="isFinish"></finish>
+      <finish v-else-if="isFinish"
+      v-bind:is_finish="scoreTot"
+      ></finish>
     </div>
     <script src="https://cdn.jsdelivr.net/npm/vue@2.5.22/dist/vue.js"></script>
     <script src="https://unpkg.com/axios@0.18.0/dist/axios.js"></script>
