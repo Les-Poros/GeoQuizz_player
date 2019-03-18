@@ -14,6 +14,20 @@ Vue.component("accueil", {
     `
 });
 
+Vue.component("finish", {
+  data: function() {
+    return {
+
+    };
+  },
+  methods: {},
+  template: `
+    <div class="d-flex justify-content-center app">
+        FINISH
+        </div>
+    `
+});
+
 Vue.component("start", {
   data: function() {
     return {
@@ -118,6 +132,7 @@ Vue.component("game", {
       cible:"",
       res: "",  
       map: "",
+      statusGame : false,
       //photo
       index: 0,
 
@@ -130,6 +145,7 @@ Vue.component("game", {
   methods: {
 
     calculateDistance(){
+    if(this.index < 9){
     //on récupère les coordonnées de la photo
     this.cible = L.marker([this.liste_photo[this.index].latitude, this.liste_photo[this.index].longitude]);
 
@@ -141,6 +157,12 @@ Vue.component("game", {
       
       //On passe à la photo suivante
       this.next();
+    }
+    else{
+      this.statusGame = true;
+      this.$emit("isfinish",this.statusGame);
+      console.log("finish");
+    }
     },
     calculateScore(distanceClique){
       if(distanceClique < this.distanceCoeff ){
@@ -153,10 +175,13 @@ Vue.component("game", {
       }
     },
     next() {
-      if (this.index < 10) {
+      
         this.index++;
         console.log(this.index);
-      }
+        if(this.index == 9){
+          console.log ("finish");
+        }
+    
     },
     clickMap(map){
       let self =this;
@@ -180,7 +205,8 @@ Vue.component("game", {
   },
   mounted() {
     
-    this.map = L.map("mapid").setView([this.liste_serie[0], this.liste_serie[1]], 13);
+    this.map = L.map("mapid").setView([this.liste_serie[0], this.liste_serie[1]], 10);
+    
     L.tileLayer(
       "https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}",
       {
@@ -194,8 +220,7 @@ Vue.component("game", {
       }
     ).addTo(this.map);
 
-    //place stanislas
-    L.circle([this.liste_serie[0], this.liste_serie[1]], { radius: 2000 }).addTo(this.map);
+   
 
     //Une fois load, on écoute les actions sur la carte
     
@@ -211,14 +236,15 @@ Vue.component("game", {
     <nav class="navbar navbar-light bg-light d-flex flex-row nav-text">   
                 <div class="input-group text-center">
                 <img src="images/logo.png"  style="width: 3%; height: 3%" >
-                <h2 v-if="index > 1"> Serie : Nancy - Photo({{index}}/10)</h2>
+                <h2 v-if="index >0"> Serie : Nancy - Photo({{index}}/10) Votre Score : {{scoreTot}}</h2>
                 <h2 v-else>Serie : Nancy - Photo(1/10)</h2>
                 </div>
             </nav> 
     <div class="row">
-    <div class="col-lg-7">
+    <div class="col-lg-7 col-sm-12">
               
     <div id="mapid" style="height: 500px">
+
     </div>
 
     </div>
@@ -226,8 +252,9 @@ Vue.component("game", {
     <div class="col-lg-5" >
     <div>
         
-        <img  :src="liste_photo[index].url" style="width:100%; height :100%;margin-right: 10px;" >
-        <button v-on:click=next()>next</button>
+        <img  :src="liste_photo[index].url" style="max-width: 100%;
+        max-height: 500px;margin-right: 5px;" >
+        
     </div>
     </div>
     </div>
@@ -240,12 +267,14 @@ var content = new Vue({
   el: "#main_page",
   data: {
     isAccueil: true,
+    isFinish: false,
     idPartie: "",
     token: "",
     listePhoto: [],
     listeSerie:[],
   },
   methods: {
+
     getSerie(info){
       this.listeSerie = [info[0],info[1]];
       console.log('liste : ' + this.listeSerie);
@@ -275,6 +304,9 @@ var content = new Vue({
         });
 
      
+    },
+    getFinish(finish){
+      this.isFinish = finish;
     }
   },
   computed: {},
