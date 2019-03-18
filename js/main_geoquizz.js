@@ -119,17 +119,38 @@ Vue.component("game", {
       res: "",  
       map: "",
       //photo
-      index: 0
+      index: 0,
+
+      //score
+      distanceCoeff : 100,
+      scoreTot : 0,
       
     };
   },
   methods: {
 
     calculateDistance(){
+    //on récupère les coordonnées de la photo
+    this.cible = L.marker([this.liste_photo[this.index].latitude, this.liste_photo[this.index].longitude]);
+
       console.log(this.pos +"cible : "+ this.cible["_latlng"]);
+      //On calcule la distance entre l'endroit cliqué et la photo
       this.res= L.GeometryUtil.length([this.pos,this.cible["_latlng"]]);
+      this.calculateScore(this.res);
       console.log(this.res);
+      
+      //On passe à la photo suivante
       this.next();
+    },
+    calculateScore(distanceClique){
+      if(distanceClique < this.distanceCoeff ){
+        this.scoreTot+= 5;
+        console.log(this.scoreTot);
+      }
+      else{
+        this.score += 0;
+        console.log(this.scoreTot);
+      }
     },
     next() {
       if (this.index < 10) {
@@ -174,7 +195,6 @@ Vue.component("game", {
     ).addTo(this.map);
 
     //place stanislas
-    this.cible = L.marker([48.6939, 6.182909999999993]);
     L.circle([this.liste_serie[0], this.liste_serie[1]], { radius: 2000 }).addTo(this.map);
 
     //Une fois load, on écoute les actions sur la carte
