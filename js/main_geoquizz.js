@@ -148,8 +148,8 @@ Vue.component("game", {
       //photo
       index: 0,
 
-      //score
-      distanceCoeff : 100,
+      //Partie : la distance d'erreur est de 200m par défaut
+      distanceMax : 200,
       scoreTot : 0,
       
     };
@@ -177,13 +177,17 @@ Vue.component("game", {
     }
     },
     calculateScore(distanceClique){
-      if(distanceClique < this.distanceCoeff ){
+      console.log("oh"+1.5*this.distanceMax);
+      if(distanceClique <= this.distanceMax ){
         this.scoreTot+= 5;
+        console.log(this.scoreTot);
+      }
+      else if(distanceClique <= 1.5*this.distanceMax){
+        this.scoreTot += 2;
         console.log(this.scoreTot);
       }
       else{
         this.score += 0;
-        console.log(this.scoreTot);
       }
     },
     next() {
