@@ -21,11 +21,22 @@ Vue.component("finish", {
 
     };
   },
-  methods: {},
+  methods: {
+    reload(){
+      location.reload();
+    }
+  },
   template: `
     <div class="d-flex justify-content-center app">
-          {{is_finish}}
-        </div>
+    <nav class="navbar navbar-light bg-light d-flex flex-row">   
+                <div class="input-group">
+                <img src="images/logo.png"  style="width: 3%; height: 3%" >
+          <h2>Votre score est de {{is_finish}} points</h2>
+          <button  v-on:click="reload()" class="btn btn-couleur">Rejouer !</button>
+          </div>
+          </nav>
+          </div>
+          
     `
 });
 
@@ -75,7 +86,7 @@ Vue.component("start", {
   },
   created() {
     axios
-      .get("http://192.168.99.100:8083/series", {
+      .get("http://192.168.99.100:8082/series", {
 
       })
 
@@ -96,12 +107,12 @@ Vue.component("start", {
                 <img src="images/logo.png"  style="width: 3%; height: 3%" >
                 <div class="input-group-prepend mr-2">
   
-              <select class="selectpicker ml-2 mr-2 bg-secondary text-white" @change="getSerie($event)" v-model="idSerie">
+              <select class="selectpicker ml-2 mr-2 btn-couleur text-white" @change="getSerie($event)" v-model="idSerie">
                               <option value="" selected disabled hidden>Série</option>
                               <option v-for="serie in listeSeries" selected :value="serie.id">{{serie.ville}}</option> 
                            </select>
   
-             <select class="selectpicker ml-2 mr-2 bg-secondary text-white" @change="getNiveau($event)">
+             <select class="selectpicker ml-2 mr-2 btn-couleur text-white" @change="getNiveau($event)">
              <option value="" selected disabled hidden>Niveau</option>           
              <option value="normal">Normal</option>                      
              </select>
@@ -110,7 +121,7 @@ Vue.component("start", {
             <input type="text" class="form-control text-center" placeholder="Votre pseudo..." aria-label="pseudo" v-model="pseudo" aria-describedby="button-addon2" v-on:keyup.enter="sendData()"/>
             <div class="input-group-append w-25">
   
-            <button v-on:click="sendData()" class="btn btn-secondary ml-2">
+            <button v-on:click="sendData()" class="btn btn-couleur ml-2">
             Lancer la partie
            </button>
             </div>
