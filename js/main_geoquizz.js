@@ -76,7 +76,7 @@ Vue.component("start", {
             }
           )
           .then(response => {
-            this.$emit("startgame", [response.data.id, response.data.token]);
+            this.$emit("startgame", [response.data.id, response.data.token,this.niveauFilter]);
           })
           .catch(error => {
             console.log(error);
@@ -114,7 +114,10 @@ Vue.component("start", {
   
              <select class="selectpicker ml-2 mr-2 btn-couleur text-white" @change="getNiveau($event)">
              <option value="" selected disabled hidden>Niveau</option>           
-             <option value="normal">Normal</option>                      
+             <option value="1">Normal</option>
+             <option value="2">Difficile</option>                      
+             <option value="3">Géographe</option>                      
+
              </select>
                    </div>
   
@@ -133,7 +136,7 @@ Vue.component("start", {
 });
 
 Vue.component("game", {
-  props: ["liste_photo","liste_serie"],
+  props: ["liste_photo","liste_serie","level"],
   data: function() {
     return {
      
@@ -177,7 +180,7 @@ Vue.component("game", {
     }
     },
     calculateScore(distanceClique){
-      console.log("oh"+1.5*this.distanceMax);
+      console.log("oh"+1.75*this.distanceMax);
       if(distanceClique <= this.distanceMax ){
         this.scoreTot+= 5;
         console.log(this.scoreTot);
@@ -199,6 +202,18 @@ Vue.component("game", {
         }
     
     },
+    getLevel(){
+      if(this.level == 1){
+        this.distanceMax = 100;
+      }
+      else if(this.level == 2){
+        this.distanceMax = 75;
+
+      }
+      else if(this.level == 3){
+        this.distanceMax = 50;
+      }
+    },
     clickMap(map){
       let self =this;
       
@@ -209,6 +224,7 @@ Vue.component("game", {
         self.lon= self.pos['lng'];
         console.log(e);
         self.clique = L.marker([self.lat,self.lon]).addTo(map);
+        self.getLevel()
         self.calculateDistance();
       
   });
@@ -289,6 +305,7 @@ var content = new Vue({
     token: "",
     listePhoto: [],
     listeSerie:[],
+    niveau : "",
   },
   methods: {
 
@@ -320,7 +337,8 @@ var content = new Vue({
           }
         });
 
-     
+        this.niveau = info[2];
+        console.log("niveau: " +this.niveau)
     },
     getFinish(finish){
       this.isFinish = finish[0];

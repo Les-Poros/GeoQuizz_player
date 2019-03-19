@@ -27,6 +27,7 @@
         :idpartie="idPartie"
         v-bind:liste_photo="listePhoto"
         v-bind:liste_serie="listeSerie"
+        v-bind:level="niveau"
         v-on:isfinish="getFinish($event)"
       ></game>
       <finish v-else-if="isFinish"
