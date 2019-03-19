@@ -27,15 +27,13 @@ Vue.component("finish", {
     }
   },
   template: `
-    <div class="d-flex justify-content-center app">
-    <nav class="navbar navbar-light bg-light d-flex flex-row">   
-                <div class="input-group">
-                <img src="images/logo.png"  style="width: 3%; height: 3%" >
-          <h2>Votre score est de {{is_finish}} points</h2>
-          <button  v-on:click="reload()" class="btn btn-couleur">Rejouer !</button>
-          </div>
-          </nav>
-          </div>
+  <div class="d-flex justify-content-center app">
+  <div class="centrage d-flex flex-column align-items-center ">
+      <h2>Votre score est de {{is_finish}}</h2>
+     <button v-on:click="reload()" type="button" class="btn btn-secondary btn-couleur btn-space">Accueil</button>
+  </a>
+  </div>
+  </div>
           
     `
 });
@@ -124,7 +122,7 @@ Vue.component("start", {
             <input type="text" class="form-control text-center" placeholder="Votre pseudo..." aria-label="pseudo" v-model="pseudo" aria-describedby="button-addon2" v-on:keyup.enter="sendData()"/>
             <div class="input-group-append w-25">
   
-            <button v-on:click="sendData()" class="btn btn-couleur ml-2">
+            <button v-on:click="sendData()" class="btn btn-couleur ml-2 text-white">
             Lancer la partie
            </button>
             </div>
@@ -154,6 +152,9 @@ Vue.component("game", {
       //Partie : la distance se configure au lancement de la partie
       distanceMax : 0,
       scoreTot : 0,
+      timer: 0,
+      time:'',
+      valTime: '',
       
     };
   },
@@ -180,13 +181,21 @@ Vue.component("game", {
     }
     },
     calculateScore(distanceClique){
+      console.log("on a cliqué au bout de :"+this.valTime);
       console.log("max distance : "+1.75*this.distanceMax);
+      let multiplicateur = 1;
+      if(this.valTime <= 5){
+        multiplicateur = 4;
+      }
+      else if(this.valTime > 5 &&this.valTime <= 15 ){
+        multiplicateur = 2;
+      }
       if(distanceClique <= this.distanceMax ){
-        this.scoreTot+= 5;
+        this.scoreTot+= (5*multiplicateur);
         console.log(this.scoreTot);
       }
       else if(distanceClique <= 1.5*this.distanceMax){
-        this.scoreTot += 2;
+        this.scoreTot += (2*multiplicateur);
         console.log(this.scoreTot);
       }
       else{
@@ -197,10 +206,7 @@ Vue.component("game", {
       
         this.index++;
         console.log(this.index);
-        if(this.index == 9){
-          console.log ("finish");
-        }
-    
+            
     },
     getLevel(){
       if(this.level == 1){
@@ -214,11 +220,22 @@ Vue.component("game", {
         this.distanceMax = 50;
       }
     },
+     setTimer(){
+       let self=this;
+      let sec = 0;
+       this.timer = setInterval(function(){
+          self.time='00:'+sec;
+          sec++;
+          self.valTime = sec;
+          console.log(self.time);
+      }, 1000);
+  },
     clickMap(map){
       let self =this;
       
       this.map.on('click', function(e) {
-          
+        
+        clearInterval(self.timer);
         self.pos=e.latlng;
         self.lat = self.pos['lat'];
         self.lon= self.pos['lng'];
@@ -226,7 +243,7 @@ Vue.component("game", {
         self.clique = L.marker([self.lat,self.lon]).addTo(map);
         self.getLevel()
         self.calculateDistance();
-      
+        self.setTimer();
   });
 }
       
@@ -236,7 +253,7 @@ Vue.component("game", {
     
   },
   mounted() {
-    
+    this.setTimer();
     this.map = L.map("mapid").setView([this.liste_serie[0], this.liste_serie[1]], 10);
     
     L.tileLayer(
@@ -259,18 +276,17 @@ Vue.component("game", {
       this.clickMap(this.map);
      
    
-      //une fois le marker placé, on change de photo
          
          
   },
   template: `
     <div>
-    <nav class="navbar navbar-light bg-light d-flex flex-row nav-text">   
-                <div class="input-group text-center">
+    <nav class="navbar navbar-light bg-light d-flex flex-row">   
+               
                 <img src="images/logo.png"  style="width: 3%; height: 3%" >
-                <h2 v-if="index >0"> Serie : Nancy - Photo({{index}}/10) Votre Score : {{scoreTot}}</h2>
-                <h2 v-else>Serie : Nancy - Photo(1/10)</h2>
-                </div>
+                <h2 v-if="index >0"> Serie : Zone - Photo({{index}}/10) Votre Score : {{scoreTot}}</h2>
+                <h2 v-else>Zone : Nancy - Photo(1/10)</h2>
+                <p>{{time}}</p>
             </nav> 
     <div class="row">
     <div class="col-lg-7 col-sm-12">
