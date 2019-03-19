@@ -1,7 +1,10 @@
+//Fichier Js de l'application Geoquizz : Contient les components et l'instance de Vue.
+
+
+//-------------------------------------------------COMPONENTS-------------------------------------
+
+//Component Accueil : Ecran d'accueil de la webapp : Permet de lancer la webapp.
 Vue.component("accueil", {
-  data: function() {
-    return {};
-  },
   methods: {},
   template: `
     <div class="d-flex justify-content-center app">
@@ -14,14 +17,11 @@ Vue.component("accueil", {
     `
 });
 
+//Component Finish : Ecran de fin de partie : On affiche le score et on peut retourner à l'accueil.
 Vue.component("finish", {
   props : ["is_finish"],
-  data: function() {
-    return {
-
-    };
-  },
   methods: {
+    //Rafraîchir la page pour retourner à l'accueil
     reload(){
       location.reload();
     }
@@ -33,11 +33,15 @@ Vue.component("finish", {
      <button v-on:click="reload()" type="button" class="btn btn-secondary btn-couleur btn-space">Accueil</button>
   </a>
   </div>
-  </div>
-          
+  </div>    
     `
 });
 
+
+//Component Start : Ecran de configuration de la partie: 
+//On choisi la série à jouer
+//On sélectionne un niveau de difficulté
+//On saisi un pseudo et on lance la partie.
 Vue.component("start", {
   data: function() {
     return {
@@ -48,16 +52,23 @@ Vue.component("start", {
     };
   },
   methods: {
+    //Récupère l'id de la série choisie
+    //Params : event -> la valeur choisi dans le selectpicker
     getSerie(event) {
       this.idSerie = event.target.value;
       console.log(this.idSerie);
     },
+    //Récupère le niveau de jeu choisi
+    //Params : event -> la valeur choisi dans le selectpicker
     getNiveau(event) {
       this.niveauFilter = event.target.value;
       console.log(this.niveauFilter);
     },
 
+    //Envoyer les données nécessaire pour créer une partie sur le backoffice
     sendData() {
+      //Si l'utilisateur a saisi tous les champs :
+      //On envoi le pseudo dans le body de la requête axios au backoffice
       if (this.idSerie && this.niveauFilter && this.pseudo != null) {
         this.postBody = {
           joueur: this.pseudo
@@ -73,6 +84,7 @@ Vue.component("start", {
               }
             }
           )
+          //On récupère et on émet l'id généré, le token généré, et le niveau choisi
           .then(response => {
             this.$emit("startgame", [response.data.id, response.data.token,this.niveauFilter]);
           })
@@ -82,6 +94,8 @@ Vue.component("start", {
       }
     }
   },
+  //Quand on arrive sur la component start, on lance une requête axios pour récupérer
+  //la liste des séries disponibles sur le backoffice.
   created() {
     axios
       .get("http://192.168.99.100:8082/series", {
@@ -89,11 +103,12 @@ Vue.component("start", {
       })
 
       .then(response => {
-        //On vérifie qu'il y a bien un résultat
+        //On vérifie qu'il y a bien un résultat et on émet la latitude, et la longitude de la map qui
+        //correspond à la série
         if (response.data.content.length > 0) {
           this.$emit("getserie",[response.data.content[0].map_lat, response.data.content[0].map_lon]);
           this.listeSeries = response.data.content;
-          console.log(this.listeSeries);
+         
         }
 
       });
@@ -133,6 +148,13 @@ Vue.component("start", {
   props: ["liste_serie"]
 });
 
+
+//Component Game : On affiche la zone de jeu.
+//On affiche la carte de jeu et les images de la série
+//Quand on clique sur la carte, on calcule les points
+//on passe ensuite à la photo suivante.
+//Gestion d'un timer pour multiplier les points
+//Affichage dynamique
 Vue.component("game", {
   props: ["liste_photo","liste_serie","level"],
   data: function() {
@@ -146,7 +168,7 @@ Vue.component("game", {
       res: "",  
       map: "",
       statusGame : false,
-      //photo
+      //data pour les photos
       index: 0,
 
       //Partie : la distance se configure au lancement de la partie
@@ -160,6 +182,7 @@ Vue.component("game", {
   },
   methods: {
 
+    //Calcul de la distance : On prend les coordonées de l'image et les coordonées de l'endroit cliqué
     calculateDistance(){
     if(this.index < 9){
     //on récupère les coordonnées de la photo
@@ -175,14 +198,19 @@ Vue.component("game", {
       this.next();
     }
     else{
+      //Si index est supérieur à 9, alors on a fini la partie donc on va à l'écrand de fin
       this.statusGame = true;
       this.$emit("isfinish",[this.statusGame,this.scoreTot]);
       console.log("finish");
     }
     },
+
+    //On calcule le score pour la photo en cours
+    //Params : le résultat de la distance.
     calculateScore(distanceClique){
       console.log("on a cliqué au bout de :"+this.valTime);
       console.log("max distance : "+1.75*this.distanceMax);
+      //Multiplicateur pour le temps
       let multiplicateur = 1;
       if(this.valTime <= 5){
         multiplicateur = 4;
@@ -202,12 +230,14 @@ Vue.component("game", {
         this.score += 0;
       }
     },
+    //Passer à la photo suivante
     next() {
       
         this.index++;
         console.log(this.index);
             
     },
+    //Changer la distance acceptable pour une réponse en fonction du niveau
     getLevel(){
       if(this.level == 1){
         this.distanceMax = 100;
@@ -220,6 +250,7 @@ Vue.component("game", {
         this.distanceMax = 50;
       }
     },
+    //Etablir un timer pour le jeu
      setTimer(){
        let self=this;
       let sec = 0;
@@ -230,19 +261,25 @@ Vue.component("game", {
           console.log(self.time);
       }, 1000);
   },
+  //Ecouter les events sur la map (ici les cliques de sourris).
     clickMap(map){
       let self =this;
       
       this.map.on('click', function(e) {
-        
+        //On réinitialise le timer
         clearInterval(self.timer);
+        //On enregistre les coordonnées cliquées
         self.pos=e.latlng;
         self.lat = self.pos['lat'];
         self.lon= self.pos['lng'];
         console.log(e);
+        //On ajoute un marker à l'endroit du clique
         self.clique = L.marker([self.lat,self.lon]).addTo(map);
+        //On récupère le distance acceptable lié au level
         self.getLevel()
+        //on calcule la distance
         self.calculateDistance();
+        //On relance un timer
         self.setTimer();
   });
 }
@@ -252,8 +289,11 @@ Vue.component("game", {
   computed:{
     
   },
+  //Quand on arrive sur le component Game, on affiche instantanément la carte et la première photo de la série
   mounted() {
+    //On lance le timer
     this.setTimer();
+    //On centre la map sur la ville de la série.
     this.map = L.map("mapid").setView([this.liste_serie[0], this.liste_serie[1]], 10);
     
     L.tileLayer(
@@ -271,7 +311,7 @@ Vue.component("game", {
 
    
 
-    //Une fois load, on écoute les actions sur la carte
+    //Une fois la map load, on écoute les actions sur la carte
     
       this.clickMap(this.map);
      
@@ -310,6 +350,10 @@ Vue.component("game", {
     
      `
 });
+
+
+
+//----------------------------------------------------INSTANCE DE VUE----------------------------------
 
 var content = new Vue({
   el: "#main_page",
