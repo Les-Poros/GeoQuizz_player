@@ -1,6 +1,5 @@
 //Fichier Js de l'application Geoquizz : Contient les components et l'instance de Vue.
 
-
 //-------------------------------------------------COMPONENTS-------------------------------------
 
 //Component Accueil : Ecran d'accueil de la webapp : Permet de lancer la webapp.
@@ -19,17 +18,17 @@ Vue.component("accueil", {
 
 //Component Finish : Ecran de fin de partie : On affiche le score et on peut retourner à l'accueil.
 Vue.component("finish", {
-  props : ["is_finish"],
+  props: ["score"],
   methods: {
     //Rafraîchir la page pour retourner à l'accueil
-    reload(){
+    reload() {
       location.reload();
     }
   },
   template: `
   <div class="d-flex justify-content-center app">
   <div class="centrage d-flex flex-column align-items-center ">
-      <h2>Votre score est de {{is_finish}}</h2>
+      <h2>Votre score est de {{score}}</h2>
      <button v-on:click="reload()" type="button" class="btn btn-secondary btn-couleur btn-space">Accueil</button>
   </a>
   </div>
@@ -37,41 +36,37 @@ Vue.component("finish", {
     `
 });
 
-
-//Component Start : Ecran de configuration de la partie: 
+//Component Start : Ecran de configuration de la partie:
 //On choisi la série à jouer
 //On sélectionne un niveau de difficulté
 //On saisi un pseudo et on lance la partie.
 Vue.component("start", {
   data: function() {
     return {
-      niveauFilter: "",
+      niveauFilter: "1",
       pseudo: "",
       idSerie: "",
-      listeSeries: ""
+      listeSeries: "",
+      size: "6",
+      page: "0",
+      nbPhoto: "10",
+      pagination: []
     };
   },
   methods: {
-    //Récupère l'id de la série choisie
-    //Params : event -> la valeur choisi dans le selectpicker
-    getSerie(event) {
-      this.idSerie = event.target.value;
-      console.log(this.idSerie);
+    pageSuivant: function(page) {
+      this.page = page;
+      this.getSeries();
     },
-    //Récupère le niveau de jeu choisi
-    //Params : event -> la valeur choisi dans le selectpicker
-    getNiveau(event) {
-      this.niveauFilter = event.target.value;
-      console.log(this.niveauFilter);
-    },
-
     //Envoyer les données nécessaire pour créer une partie sur le backoffice
-    sendData() {
+    sendGame() {
       //Si l'utilisateur a saisi tous les champs :
       //On envoi le pseudo dans le body de la requête axios au backoffice
       if (this.idSerie && this.niveauFilter && this.pseudo != null) {
         this.postBody = {
-          joueur: this.pseudo
+          joueur: this.pseudo,
+          difficulte: this.niveauFilter,
+          nbphotos: this.nbPhoto
         };
 
         axios
@@ -86,68 +81,185 @@ Vue.component("start", {
           )
           //On récupère et on émet l'id généré, le token généré, et le niveau choisi
           .then(response => {
-            this.$emit("startgame", [response.data.id, response.data.token,this.niveauFilter]);
+            this.$emit("startgame", [response.data.id, response.data.token]);
           })
           .catch(error => {
             console.log(error);
           });
       }
+    },
+    getSeries() {
+      axios
+        .get("http://192.168.99.100:8082/series", {
+          params: {
+            page: this.page,
+            size: this.size
+          }
+        })
+        .then(response => {
+          //On vérifie qu'il y a bien un résultat et on émet la latitude, et la longitude de la map qui
+          //correspond à la série
+          if (response.data) {
+            this.listeSeries = response.data.content;
+            console.log(response);
+            response["data"]["links"].forEach(element => {
+              this.$set(
+                this.pagination,
+                element.rel.split(" - page:")[0],
+                element.rel.split(" - page:")[1]
+              );
+            });
+          }
+        });
     }
   },
   //Quand on arrive sur la component start, on lance une requête axios pour récupérer
   //la liste des séries disponibles sur le backoffice.
   created() {
-    axios
-      .get("http://192.168.99.100:8082/series", {
-
-      })
-
-      .then(response => {
-        //On vérifie qu'il y a bien un résultat et on émet la latitude, et la longitude de la map qui
-        //correspond à la série
-        if (response.data.content.length > 0) {
-          this.$emit("getserie",[response.data.content[0].map_lat, response.data.content[0].map_lon]);
-          this.listeSeries = response.data.content;
-         
-        }
-
-      });
+    this.getSeries();
   },
   template: `
-    
-    <nav class="navbar navbar-light bg-light d-flex flex-row">   
-                <div class="input-group">
-                <img src="images/logo.png"  style="width: 3%; height: 3%" >
-                <div class="input-group-prepend mr-2">
-  
-              <select class="selectpicker ml-2 mr-2 btn-couleur text-white" @change="getSerie($event)" v-model="idSerie">
-                              <option value="" selected disabled hidden>Série</option>
-                              <option v-for="serie in listeSeries" selected :value="serie.id">{{serie.ville}}</option> 
-                           </select>
-  
-             <select class="selectpicker ml-2 mr-2 btn-couleur text-white" @change="getNiveau($event)">
-             <option value="" selected disabled hidden>Niveau</option>           
-             <option value="1">Normal</option>
-             <option value="2">Difficile</option>                      
-             <option value="3">Géographe</option>                      
+  <div>
+    <img src="images/logo.png" class="rounded mx-auto my-2 d-block" style="width:200px;height:200">
 
-             </select>
-                   </div>
-  
-            <input type="text" class="form-control text-center" placeholder="Votre pseudo..." aria-label="pseudo" v-model="pseudo" aria-describedby="button-addon2" v-on:keyup.enter="sendData()"/>
-            <div class="input-group-append w-25">
-  
-            <button v-on:click="sendData()" class="btn btn-couleur ml-2 text-white">
-            Lancer la partie
-           </button>
-            </div>
-            
-            </div>
-            </nav> 
-             `,
-  props: ["liste_serie"]
+    <h1 class="bg-primary m-0 text-dark p-2 text-center">Choisir une zone de jeu</h1>
+    <div class="bg-dark p-2">
+      <div class="row m-0 justify-content-md-center">
+        <div
+          class="card p-3 text-white text-center border-warning col-lg-3 col-sm-6 col-12"
+          :class=" {'bg-warning' : idSerie==serie.id,'bg-dark' : idSerie!=serie.id}"
+          v-for="(serie,index) in listeSeries"
+          :key="index"
+          style="width: 18rem;cursor:pointer"
+          @click="idSerie=serie.id"
+        >
+          <img :src="serie.photo[0].url" class="card-img-top photo petite-img" alt>
+          <div class="card-body">
+            <h5 class="card-title">{{serie.ville}}</h5>
+          </div>
+        </div>
+      </div>
+      <div v-if="pagination" class="justify-content-center">
+        <div class="input-group justify-content-center mx-auto my-2 w-75">
+          <div class="input-group-prepend">
+            <span class="input-group-text bg-warning border-warning" id="basic-addon1">Nb élements</span>
+          </div>
+          <input
+            type="number"
+            class="form-control border-warning text-white bg-dark text-center"
+            aria-describedby="basic-addon1"
+            v-model="size"
+            value="10"
+          >
+          <div class="input-group-append">
+            <button
+              class="btn btn-warning"
+              type="button"
+              id="button-addon2 "
+              @click="pageSuivant(pagination.self)"
+            >Valider</button>
+          </div>
+        </div>
+        <nav aria-label="Page navigation m-2 border-warning example">
+          <ul class="pagination justify-content-center rounded-0 m-0 mb-2 app">
+            <li class="page-item">
+              <p
+                class="page-link border-warning text-warning bg-dark"
+                @click="pageSuivant(pagination.prev)"
+              >Precedent</p>
+            </li>
+            <li class="page-item" v-if="pagination.first<=pagination.self-2">
+              <p
+                class="page-link border-warning bg-dark text-warning"
+                @click="pageSuivant(pagination.first)"
+              >{{pagination.first}}</p>
+            </li>
+            <li class="page-item" v-if="pagination.first<=pagination.self-3">
+              <p class="page-link border-warning bg-dark text-warning">...</p>
+            </li>
+
+            <li class="page-item" v-if="pagination.prev!=pagination.self">
+              <p
+                class="page-link border-warning bg-dark text-warning"
+                @click="pageSuivant(pagination.prev)"
+              >{{pagination.prev}}</p>
+            </li>
+
+            <li class="page-item">
+              <p class="page-link border-warning text-warning bg-dark active">{{pagination.self}}</p>
+            </li>
+
+            <li class="page-item" v-if="pagination.next!=pagination.self">
+              <p
+                class="page-link border-warning text-warning bg-dark"
+                @click="pageSuivant(pagination.next)"
+              >{{pagination.next}}</p>
+            </li>
+
+            <li class="page-item" v-if="pagination.last-3>=pagination.self">
+              <p class="page-link border-warning bg-dark text-warning">...</p>
+            </li>
+            <li class="page-item" v-if="pagination.last-2>=pagination.self">
+              <p
+                class="page-link border-warning text-warning bg-dark"
+                @click="pageSuivant(pagination.last)"
+              >{{pagination.last}}</p>
+            </li>
+            <li class="page-item">
+              <p
+                class="page-link border-warning text-warning bg-dark"
+                @click="pageSuivant(pagination.next)"
+              >Suivant</p>
+            </li>
+          </ul>
+        </nav>
+      </div>
+    </div>
+
+    <h1 class="bg-primary m-0 p-2 text-dark text-center">Choisir les options de la partie</h1>
+    <div class="bg-dark p-3 justify-content-center">
+      <div class="justify-content-center mx-auto mb-3">
+        <label class="text-center text-white" id="basic-addon1">Difficultés de la partie :</label>
+        <select
+          class="custom-select border-warning bg-dark text-center text-white justify-content-center mx-auto"
+          v-model="niveauFilter"
+        >
+          <option text-center selected value="1">Normal</option>
+          <option value="2">Difficile</option>
+          <option value="3">Géographe</option>
+        </select>
+      </div>
+      <div class="justify-content-center mx-auto mb-3">
+        <label class="text-center text-white" id="basic-addon1">Nombres de photos<br/>(si trop elevé pour la zone, la partie comportera le nombre maximum possible de photos) :</label>
+        <input
+          type="number"
+          class="form-control border-warning text-white bg-dark text-center"
+          aria-describedby="basic-addon1"
+          v-model="nbPhoto"
+        >
+      </div>
+    </div>
+    <h1 class="bg-primary m-0 text-dark p-2 text-center">Lancer la partie</h1>
+    <div class="bg-dark mb-5 p-3 justify-content-center">
+      <label class="text-center text-white" id="basic-addon1">Pseudo :</label>
+      <input
+        type="text"
+        class="form-control border-warning text-white bg-dark text-center"
+        aria-describedby="basic-addon1"
+        v-model="pseudo"
+        placeholder="pseudo"
+      >
+      <div class="mt-3 text-center">
+        <button
+          class="btn btn-primary text-center"
+          @click="sendGame()"
+          v-bind:disabled="!pseudo || !idSerie"
+        >Jouer !!!</button>
+      </div>
+    </div>
+  </div>
+  `
 });
-
 
 //Component Game : On affiche la zone de jeu.
 //On affiche la carte de jeu et les images de la série
@@ -156,177 +268,151 @@ Vue.component("start", {
 //Gestion d'un timer pour multiplier les points
 //Affichage dynamique
 Vue.component("game", {
-  props: ["liste_photo","liste_serie","level"],
+  props: ["token", "idpartie"],
   data: function() {
     return {
-     
       pos: "",
-      lat:'',
-      lon: "",
-      clique: "",
-      cible:"",
-      res: "",  
       map: "",
-      statusGame : false,
       //data pour les photos
       index: 0,
-
+      partie: "",
       //Partie : la distance se configure au lancement de la partie
-      distanceMax : 0,
-      scoreTot : 0,
-      timer: 0,
-      time:'',
-      valTime: '',
-      
+      distanceMax: 0,
+      timer: "",
+      score: 0,
+      valTime: ""
     };
   },
   methods: {
-
     //Calcul de la distance : On prend les coordonées de l'image et les coordonées de l'endroit cliqué
-    calculateDistance(){
-    if(this.index < 9){
-    //on récupère les coordonnées de la photo
-    this.cible = L.marker([this.liste_photo[this.index].latitude, this.liste_photo[this.index].longitude]);
+    calculateDistance() {
+      //on récupère les coordonnées de la photo
+      let cible = L.marker([
+        this.partie.photo[this.index].latitude,
+        this.partie.photo[this.index].longitude
+      ]);
 
-      console.log(this.pos +"cible : "+ this.cible["_latlng"]);
       //On calcule la distance entre l'endroit cliqué et la photo
-      this.res= L.GeometryUtil.length([this.pos,this.cible["_latlng"]]);
-      this.calculateScore(this.res);
-      console.log(this.res);
-      
-      //On passe à la photo suivante
-      this.next();
-    }
-    else{
-      //Si index est supérieur à 9, alors on a fini la partie donc on va à l'écrand de fin
-      this.statusGame = true;
-      this.$emit("isfinish",[this.statusGame,this.scoreTot]);
-      console.log("finish");
-    }
+      let res = L.GeometryUtil.length([this.pos, cible["_latlng"]]);
+      this.calculateScore(res);
+      if (this.index < this.partie.photo.length-1) {
+        //On passe à la photo suivante
+        this.next();
+      } else {
+        this.statusGame = true;
+        this.$emit("isfinish", [this.score]);
+      }
     },
 
     //On calcule le score pour la photo en cours
     //Params : le résultat de la distance.
-    calculateScore(distanceClique){
-      console.log("on a cliqué au bout de :"+this.valTime);
-      console.log("max distance : "+1.75*this.distanceMax);
+    calculateScore(distanceClique) {
       //Multiplicateur pour le temps
       let multiplicateur = 1;
-      if(this.valTime <= 5){
+      if (this.valTime <= 5) {
         multiplicateur = 4;
-      }
-      else if(this.valTime > 5 &&this.valTime <= 15 ){
+      } else if (this.valTime > 5 && this.valTime <= 15) {
         multiplicateur = 2;
       }
-      if(distanceClique <= this.distanceMax ){
-        this.scoreTot+= (5*multiplicateur);
-        console.log(this.scoreTot);
-      }
-      else if(distanceClique <= 1.5*this.distanceMax){
-        this.scoreTot += (2*multiplicateur);
-        console.log(this.scoreTot);
-      }
-      else{
-        this.score += 0;
+      if (distanceClique <= this.distanceMax) {
+        this.score += 5 * multiplicateur;
+      } else if (distanceClique <= 1.5 * this.distanceMax) {
+        this.score += 2 * multiplicateur;
       }
     },
     //Passer à la photo suivante
     next() {
-      
-        this.index++;
-        console.log(this.index);
-            
+      this.index++;
     },
     //Changer la distance acceptable pour une réponse en fonction du niveau
-    getLevel(){
-      if(this.level == 1){
+    getLevel() {
+      if (this.partie.difficulte == 1) {
         this.distanceMax = 100;
-      }
-      else if(this.level == 2){
+      } else if (this.partie.difficulte == 2) {
         this.distanceMax = 75;
-
-      }
-      else if(this.level == 3){
+      } else if (this.partie.difficulte == 3) {
         this.distanceMax = 50;
       }
     },
     //Etablir un timer pour le jeu
-     setTimer(){
-       let self=this;
-      let sec = 0;
-       this.timer = setInterval(function(){
-          self.time='00:'+sec;
-          sec++;
-          self.valTime = sec;
-          console.log(self.time);
+    setTimer() {
+      let self = this;
+      self.valTime = 0;
+      this.timer = setInterval(function() {
+        self.valTime++;
       }, 1000);
-  },
-  //Ecouter les events sur la map (ici les cliques de sourris).
-    clickMap(map){
-      let self =this;
-      
-      this.map.on('click', function(e) {
+    },
+    //Ecouter les events sur la map (ici les cliques de sourris).
+    clickMap(map) {
+      let self = this;
+
+      this.map.on("click", function(e) {
         //On réinitialise le timer
         clearInterval(self.timer);
         //On enregistre les coordonnées cliquées
-        self.pos=e.latlng;
-        self.lat = self.pos['lat'];
-        self.lon= self.pos['lng'];
-        console.log(e);
+        self.pos = e.latlng;
         //On ajoute un marker à l'endroit du clique
-        self.clique = L.marker([self.lat,self.lon]).addTo(map);
+        L.marker([self.pos["lat"], self.pos["lng"]]).addTo(map);
         //On récupère le distance acceptable lié au level
-        self.getLevel()
+        self.getLevel();
         //on calcule la distance
         self.calculateDistance();
         //On relance un timer
         self.setTimer();
-  });
-}
-      
-},
-  
-  computed:{
-    
+      });
+    },
+    startGame() {
+      axios
+        .get("http://192.168.99.100:8082/parties/" + this.idpartie, {
+          headers: {
+            "x-lbs-token": this.token
+          }
+        })
+        .then(response => {
+          //On vérifie qu'il y a bien un résultat
+
+          this.partie = response.data;
+          this.partie.photo.sort(() => Math.random() - 0.5);
+
+          //On lance le timer
+          this.setTimer();
+          //On centre la map sur la ville de la série.
+          this.map = L.map("mapid").setView(
+            [this.partie.serie.map_lat, this.partie.serie.map_lon],
+            10
+          );
+
+          L.tileLayer(
+            "https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}",
+            {
+              attribution:
+                'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
+              maxZoom: 18,
+              minZoom: 12,
+              id: "mapbox.streets",
+              accessToken:
+                "pk.eyJ1IjoibGVvbGV6aWciLCJhIjoiY2p0NGk5bGhxMDN6MjN5bnc0dWo5M2w1YSJ9.Rp94LWSF0ljKG8zCV2MdBw"
+            }
+          ).addTo(this.map);
+
+          //Une fois la map load, on écoute les actions sur la carte
+
+          this.clickMap(this.map);
+        });
+    }
   },
+
+  computed: {},
   //Quand on arrive sur le component Game, on affiche instantanément la carte et la première photo de la série
-  mounted() {
-    //On lance le timer
-    this.setTimer();
-    //On centre la map sur la ville de la série.
-    this.map = L.map("mapid").setView([this.liste_serie[0], this.liste_serie[1]], 10);
-    
-    L.tileLayer(
-      "https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}",
-      {
-        attribution:
-          'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
-          maxZoom : 18,
-          minZoom : 12,
-        id: "mapbox.streets",
-        accessToken:
-          "pk.eyJ1IjoibGVvbGV6aWciLCJhIjoiY2p0NGk5bGhxMDN6MjN5bnc0dWo5M2w1YSJ9.Rp94LWSF0ljKG8zCV2MdBw"
-      }
-    ).addTo(this.map);
-
-   
-
-    //Une fois la map load, on écoute les actions sur la carte
-    
-      this.clickMap(this.map);
-     
-   
-         
-         
+  created() {
+    this.startGame();
   },
   template: `
     <div>
     <nav class="navbar navbar-light bg-light d-flex flex-row">   
-               
                 <img src="images/logo.png"  style="width: 3%; height: 3%" >
-                <h2 v-if="index >0"> Serie : Zone - Photo({{index}}/10) Votre Score : {{scoreTot}}</h2>
-                <h2 v-else>Zone : Nancy - Photo(1/10)</h2>
-                <p>{{time}}</p>
+                <h2 v-if="partie"> Serie : Zone - Photo({{index}}/{{partie.photo.length}}) Votre Score : {{score}}</h2>
+                <p>{{valTime}}</p>
             </nav> 
     <div class="row">
     <div class="col-lg-7 col-sm-12">
@@ -340,7 +426,7 @@ Vue.component("game", {
     <div class="col-lg-5" >
     <div>
         
-        <img  :src="liste_photo[index].url" style="max-width: 100%;
+        <img v-if="partie" :src="partie.photo[index].url" style="max-width: 100%;
         max-height: 500px;margin-right: 5px;" >
         
     </div>
@@ -351,8 +437,6 @@ Vue.component("game", {
      `
 });
 
-
-
 //----------------------------------------------------INSTANCE DE VUE----------------------------------
 
 var content = new Vue({
@@ -360,53 +444,14 @@ var content = new Vue({
   data: {
     isAccueil: true,
     isFinish: false,
-    scoreTot : 0,
     idPartie: "",
-    token: "",
-    listePhoto: [],
-    listeSerie:[],
-    niveau : "",
+    score:"",
+    token: ""
   },
   methods: {
-
-    getSerie(info){
-      this.listeSerie = [info[0],info[1]];
-      console.log('liste : ' + this.listeSerie);
-    },
-    startGame(info) {
-      axios
-        .get("http://192.168.99.100:8082/parties/" + info[0], {
-          headers: {
-            "x-lbs-token": info[1]
-          }
-        })
-        .then(response => {
-          //On vérifie qu'il y a bien un résultat
-          if (
-            response.data.photo.length > 0 &&
-            response.data.photo.length <= 10
-          ) {
-            this.idPartie = info[0];
-            this.token = info[1];
-            this.listePhoto = response.data.photo;
-
-            console.log(this.listePhoto);
-            console.log("token : " + this.token + "idPartie : " + this.idPartie);
-          } else {
-            //CAS ou plus de 10 photos
-          }
-        });
-
-        this.niveau = info[2];
-        console.log("niveau: " +this.niveau)
-    },
-    getFinish(finish){
+    getFinish(finish) {
       this.isFinish = finish[0];
       this.scoreTot = finish[1];
-      console.log("score de fin :" + this.scoreTot)
     }
-  },
-  computed: {},
-  created() {
   }
 });

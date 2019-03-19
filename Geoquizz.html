@@ -2,6 +2,7 @@
 <html>
   <head>
     <title>GeoQuizz</title>
+    <meta name="viewport" content="width=device-width, user-scalable=no" />
     <!-- bootstrap -->
     <link
       rel="stylesheet"
@@ -19,24 +20,21 @@
     />
     <meta charset="utf8" />
   </head>
-  <body>
-    <div id="main_page">
+  <body class="bg-secondary">
+    <div id="main_page" class="container">
       <!-- On a 4 components qui correspondent aux 4 états différents que la web app peut avoir
            Accueil (l'accueil du jeu), Start (configuration de la partie), Game (affichage et jeu), Finish (écran de fin) 
       -->
       <accueil v-if="isAccueil" v-on:ready="isAccueil = false"></accueil>
-      <start v-else-if=" !idPartie" v-on:startgame="startGame($event)" v-on:getserie="getSerie($event)"></start>
+      <start v-else-if=" !idPartie" v-on:startgame="idPartie=$event[0];token=$event[1]"></start>
       <game
         v-else-if="idPartie !='' && !isFinish"
         :token="token"
         :idpartie="idPartie"
-        v-bind:liste_photo="listePhoto"
-        v-bind:liste_serie="listeSerie"
-        v-bind:level="niveau"
-        v-on:isfinish="getFinish($event)"
+        v-on:isfinish="score=$event;isFinish=true"
       ></game>
       <finish v-else-if="isFinish"
-      v-bind:is_finish="scoreTot"
+      v-bind:score="score"
       ></finish>
     </div>
 
