@@ -151,8 +151,8 @@ Vue.component("game", {
       //photo
       index: 0,
 
-      //Partie : la distance d'erreur est de 200m par défaut
-      distanceMax : 200,
+      //Partie : la distance se configure au lancement de la partie
+      distanceMax : 0,
       scoreTot : 0,
       
     };
@@ -180,7 +180,7 @@ Vue.component("game", {
     }
     },
     calculateScore(distanceClique){
-      console.log("oh"+1.75*this.distanceMax);
+      console.log("max distance : "+1.75*this.distanceMax);
       if(distanceClique <= this.distanceMax ){
         this.scoreTot+= 5;
         console.log(this.scoreTot);
