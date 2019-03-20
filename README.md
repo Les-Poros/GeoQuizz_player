@@ -8,19 +8,14 @@ Membres du projet :
 
 # Prérequis :
 
-* Maven
-* Docker
-* Docker-compose
+* Avoir lancé les micro-services
 
-# Pour récupérer le player
+## Pour récupérer le player
 
 * Cloner le dépôt soit :
     - via SSH : git clone git@github.com:Les-Poros/GeoQuizz_player.git
     - via HTTPS : git clone https://github.com/Les-Poros/GeoQuizz_player.git
     
-# Pour lancer le player
+## Pour lancer le player
 
-* mvn clean install -DskipTests
-* docker-compose up --build -d
-
-Celui ci sera alors accessible sur le port 8082 de votre adresse docker
+* 
