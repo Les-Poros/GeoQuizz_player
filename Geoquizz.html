@@ -3,6 +3,7 @@
   <head>
     <title>GeoQuizz</title>
     <meta name="viewport" content="width=device-width, user-scalable=no" />
+    <link rel="icon" href="./images/logo.png" />
     <!-- bootstrap -->
     <link
       rel="stylesheet"
@@ -20,8 +21,8 @@
     />
     <meta charset="utf8" />
   </head>
-  <body class="bg-secondary">
-    <div id="main_page" class="container">
+  <body class="bg-light">
+    <div id="main_page">
       <!-- On a 4 components qui correspondent aux 4 états différents que la web app peut avoir
            Accueil (l'accueil du jeu), Start (configuration de la partie), Game (affichage et jeu), Finish (écran de fin) 
       -->
@@ -31,10 +32,12 @@
         v-else-if="idPartie !='' && !isFinish"
         :token="token"
         :idpartie="idPartie"
-        v-on:isfinish="score=$event;isFinish=true"
+        v-on:isfinish="score=$event[0];isFinish=true"
       ></game>
       <finish v-else-if="isFinish"
       v-bind:score="score"
+      v-bind:idpartie="idPartie"
+      v-on:refresh="refresh()"
       ></finish>
     </div>
 

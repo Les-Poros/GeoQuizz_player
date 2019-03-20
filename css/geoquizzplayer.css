@@ -1,7 +1,17 @@
 body {
   background-color: #DCDCDC;
 }
+.bg-blanco{
+  background-color: #DCDCDC;
+}
 
+.bg-bleuco{
+  background-color: #74B7FF;
+}
+
+.bg-orango{
+  background-color: #FFB52D;
+}
 .centrage {
   position: absolute;
   top: 50%;
@@ -45,13 +55,10 @@ img {
   background-color: #d39e00;
 }
 .active {
-  background-color: #ffc107 !important;
-  color: #454d55 !important;
-}
-.active:hover {
   background-color: #454d55 !important;
-  color: #ffc107 !important;
+  color: white !important;
 }
+
 li p {
   margin: 0;
 }
@@ -65,4 +72,19 @@ option {
   text-align: center;
   /* reset to left*/
 }
+
+.jeu{
+  border-radius:50px;
+  overflow: hidden;
+  margin-bottom: 2em;
+}
+
+.time{
+  background-color: white;
+  padding: 4px;
+ border: 1px solid grey;
+ border-radius: 5px;
+}
+
+
 /*# sourceMappingURL=geoquizzplayer.css.map */

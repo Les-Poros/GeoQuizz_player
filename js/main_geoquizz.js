@@ -10,7 +10,6 @@ Vue.component("accueil", {
         <div class="centrage d-flex flex-column align-items-center ">
         <img src="images/logo.png" class="img-fluid">
            <button v-on:click="$emit('ready')" type="button" class="btn btn-secondary btn-couleur btn-space">Jouer à GeoQuizz</button>
-        </a>
         </div>
         </div>
     `
@@ -18,19 +17,34 @@ Vue.component("accueil", {
 
 //Component Finish : Ecran de fin de partie : On affiche le score et on peut retourner à l'accueil.
 Vue.component("finish", {
-  props: ["score"],
+  props: ["score","idpartie"],
   methods: {
     //Rafraîchir la page pour retourner à l'accueil
-    reload() {
-      location.reload();
+    finGame() {
+      axios
+      .put(
+        "http://192.168.99.100:8082/parties/" + this.idpartie,
+        {
+          score: this.score,
+          status: "finit"
+        },
+        {
+          headers: {
+            "Content-Type": "application/json"
+          }
+        }
+      )
+      .then(response => {
+        this.$emit("refresh");
+      })
+      
     }
   },
   template: `
   <div class="d-flex justify-content-center app">
   <div class="centrage d-flex flex-column align-items-center ">
       <h2>Votre score est de {{score}}</h2>
-     <button v-on:click="reload()" type="button" class="btn btn-secondary btn-couleur btn-space">Accueil</button>
-  </a>
+     <button v-on:click="finGame()" type="button" class="btn btn-secondary btn-couleur btn-space">Accueil</button>
   </div>
   </div>    
     `
@@ -63,16 +77,14 @@ Vue.component("start", {
       //Si l'utilisateur a saisi tous les champs :
       //On envoi le pseudo dans le body de la requête axios au backoffice
       if (this.idSerie && this.niveauFilter && this.pseudo != null) {
-        this.postBody = {
-          joueur: this.pseudo,
-          difficulte: this.niveauFilter,
-          nbphotos: this.nbPhoto
-        };
-
         axios
           .post(
             "http://192.168.99.100:8082/parties/series/" + this.idSerie,
-            this.postBody,
+            {
+              joueur: this.pseudo,
+              difficulte: this.niveauFilter,
+              nbphotos: this.nbPhoto
+            },
             {
               headers: {
                 "Content-Type": "application/json"
@@ -119,15 +131,16 @@ Vue.component("start", {
     this.getSeries();
   },
   template: `
-  <div>
-    <img src="images/logo.png" class="rounded mx-auto my-2 d-block" style="width:200px;height:200">
+  <div  class="container">
+    <img src="images/logo.png" class="rounded mx-auto my-2 d-block" style="width:200px;height:200px">
 
-    <h1 class="bg-primary m-0 text-dark p-2 text-center">Choisir une zone de jeu</h1>
-    <div class="bg-dark p-2">
+    <div class="jeu">
+    <h1 class="bg-orango m-0 text-dark p-2 text-center">Choisir une zone de jeu</h1>
+    <div class="bg-blanco p-2">
       <div class="row m-0 justify-content-md-center">
         <div
-          class="card p-3 text-white text-center border-warning col-lg-3 col-sm-6 col-12"
-          :class=" {'bg-warning' : idSerie==serie.id,'bg-dark' : idSerie!=serie.id}"
+          class="card p-3 text-white text-center border-white col-lg-3 col-sm-6 col-12"
+          :class=" {'bg-bleuco text-dark' : idSerie==serie.id,'bg-secondary' : idSerie!=serie.id}"
           v-for="(serie,index) in listeSeries"
           :key="index"
           style="width: 18rem;cursor:pointer"
@@ -139,75 +152,56 @@ Vue.component("start", {
           </div>
         </div>
       </div>
-      <div v-if="pagination" class="justify-content-center">
-        <div class="input-group justify-content-center mx-auto my-2 w-75">
-          <div class="input-group-prepend">
-            <span class="input-group-text bg-warning border-warning" id="basic-addon1">Nb élements</span>
-          </div>
-          <input
-            type="number"
-            class="form-control border-warning text-white bg-dark text-center"
-            aria-describedby="basic-addon1"
-            v-model="size"
-            value="10"
-          >
-          <div class="input-group-append">
-            <button
-              class="btn btn-warning"
-              type="button"
-              id="button-addon2 "
-              @click="pageSuivant(pagination.self)"
-            >Valider</button>
-          </div>
-        </div>
-        <nav aria-label="Page navigation m-2 border-warning example">
+      <div v-if="pagination" class="justify-content-center my-2">
+   
+        <nav aria-label="Page navigation  border-white example">
           <ul class="pagination justify-content-center rounded-0 m-0 mb-2 app">
             <li class="page-item">
               <p
-                class="page-link border-warning text-warning bg-dark"
+                class="page-link border-white text-white bg-secondary"
                 @click="pageSuivant(pagination.prev)"
               >Precedent</p>
             </li>
             <li class="page-item" v-if="pagination.first<=pagination.self-2">
               <p
-                class="page-link border-warning bg-dark text-warning"
+                class="page-link border-white bg-secondary text-white"
                 @click="pageSuivant(pagination.first)"
               >{{pagination.first}}</p>
             </li>
             <li class="page-item" v-if="pagination.first<=pagination.self-3">
-              <p class="page-link border-warning bg-dark text-warning">...</p>
+              <p class="page-link border-white bg-secondary text-white">...</p>
             </li>
 
             <li class="page-item" v-if="pagination.prev!=pagination.self">
               <p
-                class="page-link border-warning bg-dark text-warning"
+                class="page-link border-white bg-secondary text-white"
                 @click="pageSuivant(pagination.prev)"
               >{{pagination.prev}}</p>
             </li>
 
             <li class="page-item">
-              <p class="page-link border-warning text-warning bg-dark active">{{pagination.self}}</p>
+              <p class="page-link border-white text-white bg-secondary active">{{pagination.self}}</p>
             </li>
 
             <li class="page-item" v-if="pagination.next!=pagination.self">
               <p
-                class="page-link border-warning text-warning bg-dark"
+                class="page-link border-white text-white bg-secondary"
                 @click="pageSuivant(pagination.next)"
               >{{pagination.next}}</p>
             </li>
 
             <li class="page-item" v-if="pagination.last-3>=pagination.self">
-              <p class="page-link border-warning bg-dark text-warning">...</p>
+              <p class="page-link border-white bg-secondary text-white">...</p>
             </li>
             <li class="page-item" v-if="pagination.last-2>=pagination.self">
               <p
-                class="page-link border-warning text-warning bg-dark"
+                class="page-link border-white text-white bg-secondary"
                 @click="pageSuivant(pagination.last)"
               >{{pagination.last}}</p>
             </li>
             <li class="page-item">
               <p
-                class="page-link border-warning text-warning bg-dark"
+                class="page-link border-white text-white bg-secondary"
                 @click="pageSuivant(pagination.next)"
               >Suivant</p>
             </li>
@@ -216,12 +210,12 @@ Vue.component("start", {
       </div>
     </div>
 
-    <h1 class="bg-primary m-0 p-2 text-dark text-center">Choisir les options de la partie</h1>
-    <div class="bg-dark p-3 justify-content-center">
+    <h1 class="bg-orango m-0 p-2 text-dark text-center">Choisir les options de la partie</h1>
+    <div class="bg-blanco p-3 justify-content-center">
       <div class="justify-content-center mx-auto mb-3">
-        <label class="text-center text-white" id="basic-addon1">Difficultés de la partie :</label>
+        <label class="text-center text-dark" id="basic-addon1">Difficultés de la partie :</label>
         <select
-          class="custom-select border-warning bg-dark text-center text-white justify-content-center mx-auto"
+          class="custom-select bg-white text-center text-dark justify-content-center mx-auto"
           v-model="niveauFilter"
         >
           <option text-center selected value="1">Normal</option>
@@ -230,32 +224,34 @@ Vue.component("start", {
         </select>
       </div>
       <div class="justify-content-center mx-auto mb-3">
-        <label class="text-center text-white" id="basic-addon1">Nombres de photos<br/>(si trop elevé pour la zone, la partie comportera le nombre maximum possible de photos) :</label>
+        <label class="text-left text-dark" id="basic-addon1">Nombres de photos<br/>(si trop elevé pour la zone, la partie comportera le nombre maximum possible de photos) :</label>
         <input
           type="number"
-          class="form-control border-warning text-white bg-dark text-center"
+          class="form-control text-dark bg-white text-center"
           aria-describedby="basic-addon1"
+          min="10" max="25"
           v-model="nbPhoto"
         >
       </div>
     </div>
-    <h1 class="bg-primary m-0 text-dark p-2 text-center">Lancer la partie</h1>
-    <div class="bg-dark mb-5 p-3 justify-content-center">
-      <label class="text-center text-white" id="basic-addon1">Pseudo :</label>
+    <h1 class="bg-orango   m-0 text-dark p-2 text-center">Lancer la partie</h1>
+    <div class="bg-blanco p-3 justify-content-center">
+      <label class="text-center text-dark" id="basic-addon1">Pseudo :</label>
       <input
         type="text"
-        class="form-control border-warning text-white bg-dark text-center"
+        class="form-control text-dark bg-white text-center"
         aria-describedby="basic-addon1"
         v-model="pseudo"
         placeholder="pseudo"
       >
       <div class="mt-3 text-center">
         <button
-          class="btn btn-primary text-center"
+          class="btn px-3 py-2 btn-primary text-center"
           @click="sendGame()"
           v-bind:disabled="!pseudo || !idSerie"
-        >Jouer !!!</button>
+        >JOUER</button>
       </div>
+    </div>
     </div>
   </div>
   `
@@ -273,6 +269,7 @@ Vue.component("game", {
     return {
       pos: "",
       map: "",
+      cliquable:true,
       //data pour les photos
       index: 0,
       partie: "",
@@ -280,29 +277,29 @@ Vue.component("game", {
       distanceMax: 0,
       timer: "",
       score: 0,
-      valTime: ""
+      valTime: "",
+      //Marker
+      orangeIcon:"",
+      click:"",
+      cible:""
     };
   },
   methods: {
     //Calcul de la distance : On prend les coordonées de l'image et les coordonées de l'endroit cliqué
     calculateDistance() {
       //on récupère les coordonnées de la photo
-      let cible = L.marker([
+      this.cible = L.marker([
         this.partie.photo[this.index].latitude,
         this.partie.photo[this.index].longitude
-      ]);
+      ],{icon: this.orangeIcon}).addTo(this.map)
 
       //On calcule la distance entre l'endroit cliqué et la photo
-      let res = L.GeometryUtil.length([this.pos, cible["_latlng"]]);
+      let res = L.GeometryUtil.length([this.pos, this.cible["_latlng"]]);
       this.calculateScore(res);
-      if (this.index < this.partie.photo.length-1) {
+      
         //On passe à la photo suivante
         this.next();
-      } else {
-        this.statusGame = true;
-        this.$emit("isfinish", [this.score]);
-      }
-    },
+      },
 
     //On calcule le score pour la photo en cours
     //Params : le résultat de la distance.
@@ -322,43 +319,57 @@ Vue.component("game", {
     },
     //Passer à la photo suivante
     next() {
-      this.index++;
+      var self=this;
+      setTimeout(function(){
+        if (self.index < self.partie.photo.length-1) {
+          if (self.click && self.cible) {
+            self.map.removeLayer(self.click);
+            self.map.removeLayer(self.cible);
+          }
+        self.setTimer();
+          self.index++;
+        }else {
+          self.$emit("isfinish", [self.score]);
+        }
+        
+      }, 3000);
+     
     },
     //Changer la distance acceptable pour une réponse en fonction du niveau
     getLevel() {
       if (this.partie.difficulte == 1) {
-        this.distanceMax = 100;
+        this.distanceMax = 200;
       } else if (this.partie.difficulte == 2) {
-        this.distanceMax = 75;
+        this.distanceMax = 150;
       } else if (this.partie.difficulte == 3) {
-        this.distanceMax = 50;
+        this.distanceMax = 100;
       }
     },
     //Etablir un timer pour le jeu
     setTimer() {
       let self = this;
-      self.valTime = 0;
       this.timer = setInterval(function() {
         self.valTime++;
+        self.cliquable=true;
       }, 1000);
     },
     //Ecouter les events sur la map (ici les cliques de sourris).
-    clickMap(map) {
+    clickMap() {
       let self = this;
-
+    
       this.map.on("click", function(e) {
+        if(self.cliquable){
         //On réinitialise le timer
         clearInterval(self.timer);
+        self.valTime = 0;
         //On enregistre les coordonnées cliquées
         self.pos = e.latlng;
         //On ajoute un marker à l'endroit du clique
-        L.marker([self.pos["lat"], self.pos["lng"]]).addTo(map);
-        //On récupère le distance acceptable lié au level
-        self.getLevel();
+        self.click=L.marker([self.pos["lat"], self.pos["lng"]]).addTo(self.map);
         //on calcule la distance
         self.calculateDistance();
-        //On relance un timer
-        self.setTimer();
+       self.cliquable=false;
+        }
       });
     },
     startGame() {
@@ -372,8 +383,13 @@ Vue.component("game", {
           //On vérifie qu'il y a bien un résultat
 
           this.partie = response.data;
-          this.partie.photo.sort(() => Math.random() - 0.5);
-
+          var j, x, i;
+          for (i = this.partie.photo.length - 1; i > 0; i--) {
+              j = Math.floor(Math.random() * (i + 1));
+              x = this.partie.photo[i];
+              this.partie.photo[i] = this.partie.photo[j];
+              this.partie.photo[j] = x;
+          }
           //On lance le timer
           this.setTimer();
           //On centre la map sur la ville de la série.
@@ -397,25 +413,40 @@ Vue.component("game", {
 
           //Une fois la map load, on écoute les actions sur la carte
 
-          this.clickMap(this.map);
-        });
-    }
-  },
+          this.orangeIcon = new L.Icon({
+            iconUrl: './images/marker-orange.png',
+            iconSize: [25, 41],
+            iconAnchor: [12, 41],
+            popupAnchor: [1, -34],
+            shadowSize: [41, 41]
+          });
 
-  computed: {},
+          this.clickMap();
+          //On récupère le distance acceptable lié au level
+        this.getLevel();
+        });
+    },
+    
+ secondeToMinute(value) {
+  var minutes = Math.floor(value / 60);
+  var seconds = ((value % 60)).toFixed(0);
+  return minutes + ":" + (value < 10 ? '0' : '') + seconds;
+}
+  },
   //Quand on arrive sur le component Game, on affiche instantanément la carte et la première photo de la série
   created() {
     this.startGame();
   },
   template: `
-    <div>
-    <nav class="navbar navbar-light bg-light d-flex flex-row">   
-                <img src="images/logo.png"  style="width: 3%; height: 3%" >
-                <h2 v-if="partie"> Serie : Zone - Photo({{index}}/{{partie.photo.length}}) Votre Score : {{score}}</h2>
-                <p>{{valTime}}</p>
-            </nav> 
-    <div class="row">
-    <div class="col-lg-7 col-sm-12">
+    <div class=bg-blanco>
+    <nav class="navbar navbar-light text-center bg-light d-flex flex-row">   
+               
+    <img src="images/logo.png" class="mx-auto" style="width: 50px; height:50px" >
+    <div class="mx-auto"><h2 v-if="partie"> Zone : {{partie.serie.ville}} - Photo({{index +1}}/{{partie.photo.length}})</h2> <h2>Votre Score : {{score}}</h2></div>
+    <div class="time mx-auto">temps : {{secondeToMinute(valTime)}}</div>
+    </nav> 
+    <div class="row m-0">
+    <div class="col-lg-7 m-0 p-0 col-sm-12">
               
     <div id="mapid" style="height: 500px">
 
@@ -423,13 +454,12 @@ Vue.component("game", {
 
     </div>
 
-    <div class="col-lg-5" >
-    <div>
+    <div class="col-lg-5 m-0 p-0" >
+  
         
-        <img v-if="partie" :src="partie.photo[index].url" style="max-width: 100%;
+        <img v-if="partie" :src="partie.photo[index].url" class="m-0" style="width: 100%;height:500px;
         max-height: 500px;margin-right: 5px;" >
-        
-    </div>
+       
     </div>
     </div>
     </div>
@@ -449,9 +479,11 @@ var content = new Vue({
     token: ""
   },
   methods: {
-    getFinish(finish) {
-      this.isFinish = finish[0];
-      this.scoreTot = finish[1];
+    refresh(){
+      this.isFinish=false;
+      this.idPartie="";
+      this.token="";
+      this.score="";
     }
   }
 });
