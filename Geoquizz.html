@@ -27,11 +27,12 @@
            Accueil (l'accueil du jeu), Start (configuration de la partie), Game (affichage et jeu), Finish (écran de fin) 
       -->
       <accueil v-if="isAccueil" v-on:ready="isAccueil = false"></accueil>
-      <start v-else-if=" !idPartie" v-on:startgame="idPartie=$event[0];token=$event[1]"></start>
+      <start v-else-if=" !idPartie" :load="load" v-on:startgame="idPartie=$event[0];token=$event[1]"></start>
       <game
         v-else-if="idPartie !='' && !isFinish"
         :token="token"
         :idpartie="idPartie"
+        :load="load"
         v-on:isfinish="score=$event[0];isFinish=true"
       ></game>
       <finish v-else-if="isFinish"
@@ -46,6 +47,8 @@
     <script src="https://unpkg.com/axios@0.18.0/dist/axios.js"></script>
     <script src="https://unpkg.com/leaflet@1.2.0/dist/leaflet.js"></script>
     <script src="https://npmcdn.com/leaflet-geometryutil"></script>
+    <script src="js/conf/conf.js"></script>
+    <script src="js/component.js"></script>
     <script src="js/main_geoquizz.js"></script>
   </body>
 </html>
