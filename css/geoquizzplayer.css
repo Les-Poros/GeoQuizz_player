@@ -32,37 +32,4 @@ img {
   color: grey;
 }
 
-.petite-img{
-  width: 100%;
-  height: 200px;
-}
-
-.pagination p:hover {
-  cursor: pointer;
-  background-color: #454d55 !important;
-}
-.bg-jaunefonce {
-  background-color: #d39e00;
-}
-.active {
-  background-color: #ffc107 !important;
-  color: #454d55 !important;
-}
-.active:hover {
-  background-color: #454d55 !important;
-  color: #ffc107 !important;
-}
-li p {
-  margin: 0;
-}
-
-select {
-  text-align: center;
-  text-align-last: center;
-  /* webkit*/
-}
-option {
-  text-align: center;
-  /* reset to left*/
-}
 /*# sourceMappingURL=geoquizzplayer.css.map */
