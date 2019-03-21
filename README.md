@@ -18,4 +18,6 @@ Membres du projet :
     
 # Pour lancer le player
 
+Avant de le lancer, modifier les informations du conf.json avec vos informations
+
 * À l'aide d'un serveur, lancer dans un navigateur le fichier GeoQuizz.html
